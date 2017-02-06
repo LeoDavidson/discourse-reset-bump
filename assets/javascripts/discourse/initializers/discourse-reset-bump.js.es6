@@ -1,9 +1,38 @@
+// https://github.com/discourse/discourse/blob/master/app/assets/javascripts/discourse/lib/plugin-api.js.es6
 import { withPluginApi } from 'discourse/lib/plugin-api';
+
+// https://github.com/discourse/discourse/blob/master/app/assets/javascripts/discourse/lib/ajax.js.es6
+import { ajax } from 'discourse/lib/ajax';
+
+// https://github.com/discourse/discourse/blob/master/app/assets/javascripts/discourse/lib/ajax-error.js.es6
+import { popupAjaxError } from 'discourse/lib/ajax-error';
 
 // resetBumpClicked is run when the "Reset Bump To Here" button is clicked.
 function resetBumpClicked()
 {
-	alert('The button was clicked!');
+	// this.attrs is set up by the framework when it calls us.
+	// It will be different for buttons added to different places. To list what's inside it:
+	// Object.keys(this.attrs).forEach(function(key,index) { alert('Key = ' + key); });
+
+	// Get the unique ID of the post that we've been invoked on. The server can find everything
+	// else it needs from just this, as the posts database table links the post to its thread, the
+	// post's author, and the post's time. We could send these through (they're in this.attrs as
+	// well) but it's more robust to have the server decide than have it rely on the client.
+	// Client-side ajax calls can be faked, although in this case you'd still need to be "staff".
+	// It also means we don't have any client/server date/time/timezone/format issues to worry about
+	// and we send less data over the wire.
+	const post_id = this.attrs.id;
+
+	const ajaxParams =
+	{
+		type: 'POST',
+		data: { postId: post_id }
+	};
+
+	// ".catch(popupAjaxError)" below means that if the "ajax" call fails, we'll display a nice
+	// modal error message box with an OK button. The popupAjaxError helper takes care of it for us.
+
+	ajax("/reset_bump", ajaxParams).catch(popupAjaxError);
 }
 
 // resetBumpButtonDecorateCallback sets the "Reset Bump To Here" button's icon, label, and internal name.
@@ -21,7 +50,7 @@ function resetBumpButtonDecorateCallback(dec)
 		icon: 'calendar-times-o',			// Find icon names here: http://fontawesome.io/icons/
 		label: 'reset_bump.button_label',	// Name of string in e.g. config/locales/client.en.yml
 		action: 'actionResetBump'			// Internal name, used to refer to the button below.
-	}
+	};
 
 	// dec is a DecoratorHelper object passed in from Discourse when it calls us.
 	// We use dec.attach to add a new button of type 'post-admin-menu-button' and the attributes above.

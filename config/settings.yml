@@ -1,0 +1,10 @@
+plugins:
+  # All settings should start with the same prefix, reset_bump_ in our case.
+  # default defines the default value, and is also used to infer the setting's type.
+  # client: true means it is sent to the client and is effectively public knowledge
+  #         to all users, as they can look at the js/json objects in a debugger.
+  # In the main plugin.rb we'll declare that one of these settings turns the
+  # whole plugin on and off using "enabled_site_setting :reset_bump_enabled"
+  reset_bump_enabled:
+    default: true
+    client: true

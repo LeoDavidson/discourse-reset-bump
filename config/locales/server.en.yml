@@ -1,0 +1,4 @@
+en:
+  site_settings:
+    # Give the plugin settings descriptions.
+    reset_bump_enabled: "Give staff a 'Reset Bump To Here' button in the admin menu for posts?"

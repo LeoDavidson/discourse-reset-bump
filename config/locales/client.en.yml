@@ -1,0 +1,5 @@
+en:
+  js:
+    reset_bump:
+      # Translated strings for button labels and so on.
+      button_label: "Reset Bump To Here"

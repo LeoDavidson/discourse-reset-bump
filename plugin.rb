@@ -65,6 +65,8 @@ after_initialize do
       user_for_bump = post_for_bump.user_id
       time_for_bump = post_for_bump.created_at
 
+      # TODO: We should write into the admin activity log.
+      #       And obviously we should not call "puts" in the final code.
       puts("-----------------------------------------------------------------------------------------------")
       puts("--- BUMPING --- #{topic_for_bump.title} for user id #{user_for_bump} to time #{time_for_bump}")
       puts("-----------------------------------------------------------------------------------------------")

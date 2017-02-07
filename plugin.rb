@@ -82,6 +82,12 @@ after_initialize do
   # An AJAX post to http://localhost:4000/reset_bump/" triggers DiscourseResetBump::bump, above.
   # StaffConstraint is an extra check to ensure only staff can use our URLs.
   # As we have before_action callbacks for the whole plugin, StaffConstraint is probably redundant.
+  # StaffConstraint also causes a harsher 404 error if trying to access the blocked URL while
+  # the before_action :ensure_logged_in gives a "you must be logged in" type of message and
+  # the before_action :ensure_staff gives a "you don't have permission" type of message.
+  # The more descriptive errors may be better or worse depending on how visible you want the API to be.
+  # https://github.com/discourse/discourse/blob/master/lib/staff_constraint.rb
+  require_dependency "staff_constraint"
   DiscourseResetBump::Engine.routes.draw do
     post '/' => 'reset_bump#bump', constraints: StaffConstraint.new
   end

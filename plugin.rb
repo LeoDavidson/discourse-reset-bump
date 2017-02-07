@@ -39,12 +39,6 @@ after_initialize do
   class DiscourseResetBump::ResetBumpController < ::ApplicationController
     # As our functionality is only intended for "staff" users, we do server-side
     # checks to ensure we are called from a logged-on user, and that the user is staff.
-    # The Admin::AdminController mentioned in "Creating Routes in Discourse and Showing Data"
-    # is (at the time of writing) identical to ::ApplicationController that we inherit from
-    # except that it has these two checks built in. I'm not sure if we can or should use 
-    # Admin::AdminController from a plugin (other plugins I looked at don't, and I can't
-    # work out what to change the "require_dependency" line above to for the Admin version)
-    # so we inherit from the basic one and do the two tests ourselves.
     # You'll find other plugins and Discourse code using before_filter instead of
     # before_action. Both do the same thing in Rails 4.2, so we can use either. Rails 5.0
     # makes 'before_filter' deprecated and start causing warnings, and Rails 5.1 will remove
@@ -52,8 +46,23 @@ after_initialize do
     # See: http://stackoverflow.com/questions/16519828/rails-4-before-filter-vs-before-action
     before_action :ensure_logged_in
     before_action :ensure_staff
-    
+
+    # The Admin::AdminController mentioned in "Creating Routes in Discourse and Showing Data"
+    # is (at the time of writing) like ::ApplicationController but with the above two checks
+    # built-in, and an "index" method that returns nothing. I'm not sure if we should use 
+    # Admin::AdminController from a plugin (other plugins I looked at don't) and I only worked
+    # out how to after I had already tested things, so I'm sticking with how it is. But here
+    # is how you would use Admin::AdminController instead if you wanted to:
+    #
+    # require_dependency 'admin/admin_controller'
+    # class DiscourseResetBump::ResetBumpController < Admin::AdminController
+    #   .. then don't bother with the before_action lines, and the rest is then as it is now.
+
+    # TODO: Should we have an index method that renders nothing like Admin::AdminController?
+    #       What is the real purpose of it? Also, should we use Admin::AdminController itself?
+
     # Each method name corresponds to one of the Engine.routes.draw things below.
+    # "bump" is our main method, and may end up being the only one we need.
     def bump
       # As we call to_i, post_id will be 0 if it isn't there at all.
       # There is never a post with id 0 so we'll fail rather than change the wrong thing.

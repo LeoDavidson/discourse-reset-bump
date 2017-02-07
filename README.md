@@ -1,6 +1,3 @@
-# UNFINISHED WORK IN PROGRESS
-# DO NOT USE THIS YET
-
 ### discourse-reset-bump
 
 This plugin gives staff members a button to quickly reset a thread's bump time to the

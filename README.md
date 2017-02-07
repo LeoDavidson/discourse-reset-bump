@@ -15,12 +15,28 @@ between the two UIs as they use different formats. So the plugin does not let yo
 anything you could not do already (other than repairing the last post/poster if they go
 wrong), it just lets you do things more conveniently.
 
+**For developers:** The source code is extensively commented and I've aimed to do things
+in the most simple way possible (expanding most inline functions into top-level ones so
+you can more easily see the structure of things). This is the first Discourse plugin I've
+written, the first Ruby (let alone Ruby on Rails), and the first time I've used Javascript
+as much more than a stand-in for VBScript. I've got years of C++ and C# experience but
+found it hard to work out all of this, so I felt I could help others by putting detailed
+comments in the code that explain what is being done and why. In terms of what the plugin
+does, it adds buttons below the post on the client side, checks for "staff" access on
+both the server and client sides, and when the button is clicked it causes the server side
+to finds a topics and post by ID and then modifies some of their database fields. All easy
+once you know how, but days of unravelling source code, (outdated) forum threads, multiple
+languages and frameworks if you are new to it. I also recommend looking at other plugins
+to see how you can write things in a "nicer" (or at least more compact!) way once you
+understand what's going on in this one. This one's code is meant to be easy to understand
+and not necessarily the "best" way to do things. I hope it helps you!
+
 ## Installation
 
 Follow the [Install a Plugin](https://meta.discourse.org/t/install-a-plugin/19157) howto, using
 `git clone https://github.com/leodavidson/discourse-reset-bump.git` as the plugin command.
 
-Once you've installed it, it will be enabled by default and can be disbaled under the
+Once you've installed it, it will be enabled by default and can be disabled under the
 site's admin / plugin settings area, via the `reset_bump_enabled` checkbox.
 
 ## Issues

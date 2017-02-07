@@ -56,7 +56,7 @@ after_initialize do
     #
     # require_dependency 'admin/admin_controller'
     # class DiscourseResetBump::ResetBumpController < Admin::AdminController
-    #   .. then don't bother with the before_action lines, and the rest is then as it is now.
+    #   ...then don't bother with the before_action lines, and the rest is then as it is now.
 
     # TODO: Should we have an index method that renders nothing like Admin::AdminController?
     #       What is the real purpose of it? Also, should we use Admin::AdminController itself?
@@ -64,25 +64,83 @@ after_initialize do
     # Each method name corresponds to one of the Engine.routes.draw things below.
     # "bump" is our main method, and may end up being the only one we need.
     def bump
-      # As we call to_i, post_id will be 0 if it isn't there at all.
-      # There is never a post with id 0 so we'll fail rather than change the wrong thing.
-      post_id = params[:postId].to_i
-      puts("Bump post_id: #{post_id}")
+
+      # params[:post_id].to_i would return 0 if the param was missing, so this is a bit redundant
+      # but a good habit for when zero is a valid input that we need to separate from a missing param.
+      if (!params.has_key?(:post_id))
+        return render_json_error("Parameter missing: post_id")
+      end
+
+      post_id = params[:post_id].to_i
+
+      # There is never a post with id <= 0.
+      if (post_id <= 0)
+        return render_json_error("Parameter invalid: post_id")
+      end
+
+      # I'd like to wrap everything in a transaction so it is atomic...
+      # ...but I don't understand Rails transactions well enough. :-) It's not super important in this case.
+      # I'd be nice if we update the time, but then fail to update the log, that we'd rollback the time change.
+      # http://api.rubyonrails.org/classes/ActiveRecord/Transactions/ClassMethods.html
+      # transaction(requires_new: true) do ... end
+
+      # There are probably better ways but I learnt how the Post, Topic, etc. objects fit together by
+      # looking at the database tables, then finding out there are Ruby on Rails objects which map
+      # directly to them. If you open the Rails Console ("rails c" in Linux's Vagrant or Discourse dir)
+      # you can type e.g. Post to get into about the Post object, and Post.find(1) to output the post
+      # with ID=1, Post.find(1).topic_id to get the topid ID, etc. Makes things easy to find and play
+      # with. Finding the source for each file can also help
+      # e.g. https://github.com/discourse/discourse/blob/master/app/models/topic.rb
 
       post_for_bump = Post.find(post_id)
+      
+      if post_for_bump.blank?
+        return render_json_error("post_id #{post_id} not found")
+      end
+      
       topic_for_bump = Topic.find(post_for_bump.topic_id)
-      user_for_bump = post_for_bump.user_id
-      time_for_bump = post_for_bump.created_at
 
-      # TODO: We should write into the admin activity log.
-      #       And obviously we should not call "puts" in the final code.
-      puts("-----------------------------------------------------------------------------------------------")
-      puts("--- BUMPING --- #{topic_for_bump.title} for user id #{user_for_bump} to time #{time_for_bump}")
-      puts("-----------------------------------------------------------------------------------------------")
+      if topic_for_bump.blank?
+        return render_json_error("post_id #{post_id} -> topic_id #{post_for_bump.topic_id} not found")
+      end
+
+      old_bumped_at = topic_for_bump.bumped_at;
+      new_bumped_at = post_for_bump.created_at;
+
+      # We use "update!" (throws exceptions on errors) instead of "update" (returns boolean success).
+      # All the Discourse code I've looked at calls "update" and doesn't check the result, so I don't
+      # know if I'm doing something extra here that isn't needed or not. Failure would be unusual anyway.
+      topic_for_bump.update!(bumped_at:         new_bumped_at,
+                             last_post_user_id: post_for_bump.user_id)
+
+      # There is also last_posted_at but I think it makes sense to leave that alone.
+      # Arguably, we could take the last non-deleted post and use that for the last_post_user_id and last_posted_at
+      # while only taking the selected post's bump time, but it depends exactly what the admin's intent is. My
+      # personal needs are to reset the thread to the last (possibly only) post after edits to correct formatting,
+      # or I'll want to stop someone's gratuitous bump from pushing a thread to the front page. So bumped_at makes
+      # sense in both cases. I'd also like to be able to fix the problem where delete, then undelete, of the last
+      # post doesn't fix the last_post_user_id and avatar shown in the Lastest page back to the undeleted post's
+      # author. So I want to update last_post_user_id but I don't really care if it's to the selected post or the
+      # last post as they'll usually be the same for me, unless I'm trying to bury someone's post in which case
+      # I don't really care if their face is hidden from lower down the Latest list or not; for now, it will be.
+
+      # Log the action, since it can be used by a nefarious staff member to hide edits that shouldn't be hidden.
+      # https://github.com/discourse/discourse/blob/master/app/services/staff_action_logger.rb
+      # Search the source for log_custom for examples.
+      # Go to http://localhost:4000/admin/logs/staff_action_logs to see the log.
+
+      thread_url_path = "/t/#{topic_for_bump.slug}/#{topic_for_bump.id}/#{post_for_bump.post_number}"
+
+      StaffActionLogger.new(current_user).log_custom('reset_post_bump',
+             post_id: post_id,
+             previous_value: old_bumped_at,
+             new_value: new_bumped_at,
+             context: thread_url_path )
 
       # Return a success flag back to the caller.
       # If we don't do this, their "catch(popupAjaxError)" stuff will be triggered.
-      render json: success_json
+      return render json: success_json
+
     end
   end
 

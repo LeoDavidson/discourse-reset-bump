@@ -1,5 +1,11 @@
 en:
   js:
     reset_bump:
-      # Translated strings for button labels and so on.
+      # Translated string for button label.
       button_label: "Reset Bump To Here"
+    admin:
+      logs:
+        staff_actions:
+          actions:
+            # Give our custom log action name a translation. See the log_custom call in our plugin.rb
+            reset_post_bump: "reset post bump"

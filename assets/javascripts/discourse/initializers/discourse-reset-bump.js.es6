@@ -24,17 +24,13 @@ function resetBumpClicked() {
 
 	const ajaxParams = {
 		type: 'POST',
-		data: { postId: post_id }
+		data: { post_id: post_id }
 	};
 
 	// ".catch(popupAjaxError)" below means that if the "ajax" call fails, we'll display a nice
 	// modal error message box with an OK button. The popupAjaxError helper takes care of it for us.
 
 	ajax("/reset_bump", ajaxParams).catch(popupAjaxError);
-	
-	// TODO: Refresh the displayed thread, assuming that's applicable.
-	// Search for "this.appEvents.trigger('post-stream:refresh'" in other plugins which looks
-	// related to what we need to do.
 }
 
 // resetBumpButtonDecorateCallback sets the "Reset Bump To Here" button's icon, label, and internal name.

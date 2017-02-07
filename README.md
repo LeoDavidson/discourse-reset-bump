@@ -15,6 +15,12 @@ between the two UIs as they use different formats. So the plugin does not let yo
 anything you could not do already (other than repairing the last post/poster if they go
 wrong), it just lets you do things more conveniently.
 
+Each use of the *Reset Bump To Here* button will be logged in the Discourse staff actions
+log, including the topic and post IDs and URL, and old and new timestamps. This can help
+detect abuse of the functionality (e.g. to hide new posts from other admins, rather than
+the intended use of avoiding bumps when making formatting-only fixes to old threads, or
+undoing a user's gratuitous bump without deleting their message entirely.)
+
 **For developers:** The source code is extensively commented and I've aimed to do things
 in the most simple way possible (expanding most inline functions into top-level ones so
 you can more easily see the structure of things). This is the first Discourse plugin I've

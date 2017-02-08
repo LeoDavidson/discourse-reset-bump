@@ -44,8 +44,18 @@ after_initialize do
     # makes 'before_filter' deprecated and start causing warnings, and Rails 5.1 will remove
     # it entirely, so let's use the newer name from the start. We're on Rails 4.2 as of writing.
     # See: http://stackoverflow.com/questions/16519828/rails-4-before-filter-vs-before-action
+    before_action :ensure_plugin_enabled
     before_action :ensure_logged_in
     before_action :ensure_staff
+
+	# The routes (URLs) we set up are still there if we are disabled, so we should check
+	# if we should do anything. A lot of plugins don't seem to do this, for what it's worth.
+	# It seems worthwhile: If a security bug is found then a quick way to make all our URLs do
+	# nothing could block access to whatever is being exploited.
+	# "before_action :ensure_plugin_enabled", above, ensures this is called before handling a URL.
+    def ensure_plugin_enabled
+      raise Discourse::InvalidAccess.new('Reset Bump plugin is not enabled') if !SiteSetting.reset_bump_enabled
+    end
 
     # The Admin::AdminController mentioned in "Creating Routes in Discourse and Showing Data"
     # is (at the time of writing) like ::ApplicationController but with the above two checks

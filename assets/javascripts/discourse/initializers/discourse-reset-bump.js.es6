@@ -43,9 +43,10 @@ function resetBumpButtonDecorateCallback(dec) {
 	// "var" or "const" (or maybe "let") then the menu breaks or has nothing added to it.
 	// Maybe related to this: http://stackoverflow.com/questions/41792503/node-js-callback-not-defined-when-trying-to-to-a-http-request
 	const buttonAttr = {
-		icon: 'calendar-times-o',			// Find icon names here: http://fontawesome.io/icons/
-		label: 'reset_bump.button_label',	// Name of string in e.g. config/locales/client.en.yml
-		action: 'actionResetBump'			// Internal name, used to refer to the button below.
+		className: 'reset-bump',          // Becomes part of button's css class. Useful for css mods.
+		icon: 'calendar-times-o',         // Find icon names here: http://fontawesome.io/icons/
+		label: 'reset_bump.button_label', // Name of string in e.g. config/locales/client.en.yml
+		action: 'actionResetBump'         // Internal name, used to refer to the button below.
 	};
 
 	// dec is a DecoratorHelper object passed in from Discourse when it calls us.
@@ -92,11 +93,11 @@ function apiInitCallback(api)
 	/*
 	api.addPostMenuButton('actionResetBump2', attrs => {
 			return {
-				action: 'actionResetBump2',       // As in resetBumpButtonDecorateCallback.
-				icon: 'calendar-times-o',         // As in resetBumpButtonDecorateCallback.
-				className: 'actionResetBump2',    // Becomes part of button's css class. Useful for css mods.
-				title: 'reset_bump.button_label', // Like "label" in resetBumpButtonDecorateCallback.
-				position: 'first'                 // Make it the first icon in the row.
+				className: 'reset-bump',          // Becomes part of button's css class. Useful for css mods.
+				icon: 'calendar-times-o',         // Find icon names here: http://fontawesome.io/icons/
+				title: 'reset_bump.button_label', // Shown on hover. Name of string in e.g. config/locales/client.en.yml
+				action: 'actionResetBump2',       // Internal name, used to refer to the button below.
+				position: 'first'                 // Make it the first button in the row.
 			};
 		}
 	);

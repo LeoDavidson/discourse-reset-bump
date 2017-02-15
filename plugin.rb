@@ -68,8 +68,11 @@ after_initialize do
     # class DiscourseResetBump::ResetBumpController < Admin::AdminController
     #   ...then don't bother with the before_action lines, and the rest is then as it is now.
 
-    # TODO: Should we have an index method that renders nothing like Admin::AdminController?
-    #       What is the real purpose of it? Also, should we use Admin::AdminController itself?
+    # We have an index method that renders nothing like Admin::AdminController, but I am not sure
+    # if it is actually important or not. I just copied it.
+    def index
+      render nothing: true
+    end
 
     # Each method name corresponds to one of the Engine.routes.draw things below.
     # "bump" is our main method, and may end up being the only one we need.

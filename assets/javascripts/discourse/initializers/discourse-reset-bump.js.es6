@@ -46,7 +46,8 @@ function resetBumpButtonDecorateCallback(dec) {
 		className: 'reset-bump',          // Becomes part of button's css class. Useful for css mods.
 		icon: 'calendar-times-o',         // Find icon names here: http://fontawesome.io/icons/
 		label: 'reset_bump.button_label', // Name of string in e.g. config/locales/client.en.yml
-		action: 'actionResetBump'         // Internal name, used to refer to the button below.
+		action: 'actionResetBump',        // Internal name, used to refer to the button below.
+		secondaryAction: 'closeAdminMenu' // Needed in newer Discourse versions, else the menu stays open.
 	};
 
 	// dec is a DecoratorHelper object passed in from Discourse when it calls us.

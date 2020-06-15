@@ -78,9 +78,9 @@ function apiInitCallback(api)
 		return;
 	}
 
-	// Add a new button to the bottom of the Post Admin Menu. resetBumpButtonDecorateCallback (above) is
+	// Add a new button to the Post Admin Menu. resetBumpButtonDecorateCallback (above) is
 	// called to do this, and will give the new button the internal name "actionResetBump".
-	api.decorateWidget('post-admin-menu:after', resetBumpButtonDecorateCallback);
+	api.decorateWidget('post-admin-menu', resetBumpButtonDecorateCallback);
 
 	// Find the button again, using the name we gave it, and make it run resetBumpClicked when clicked.
 	api.attachWidgetAction('post-admin-menu', 'actionResetBump', resetBumpClicked);

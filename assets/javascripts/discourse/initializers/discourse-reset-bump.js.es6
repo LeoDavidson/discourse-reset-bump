@@ -55,6 +55,25 @@ function resetBumpButtonDecorateCallback(dec) {
 	return dec.attach('post-admin-menu-button', buttonAttr);
 }
 
+function newApiInitCallback(api)
+{
+	api.addPostAdminMenuButton((name, attrs) => {
+		return {
+			action: (post) => {
+				const ajaxParams = {
+					type: 'POST',
+					data: { post_id: post.id }
+				};
+
+				ajax("/reset_bump", ajaxParams).catch(popupAjaxError);
+			},
+			icon: 'calendar-times',
+			className: 'reset-bump',
+			label: 'reset_bump.button_label',
+		};
+	});
+}
+
 function apiInitCallback(api)
 {
 	// If the plugin is disabled, do nothing.
@@ -63,7 +82,7 @@ function apiInitCallback(api)
 	// That's normal and fine; the ability to disable plugins is really just there in case
 	// they start causing problems and need to be quickly turned off without a server restart.
 	const siteSettings = api.container.lookup('site-settings:main');
-	
+
 	if (!siteSettings.reset_bump_enabled) {
 		return;
 	}
@@ -75,6 +94,12 @@ function apiInitCallback(api)
 	const currentUser = api.getCurrentUser();
 
 	if (!currentUser || !currentUser.staff) {
+		return;
+	}
+
+	// Since API v1.12, api.addPostAdminMenuButton() is the new way to add a button.
+	if (api.addPostAdminMenuButton) {
+		newApiInitCallback(api);
 		return;
 	}
 
@@ -122,7 +147,7 @@ export default {
 		// We pass withPluginApi our callback function, which is given the api object to set things up.
 		// Our callback may not be called at all if the version we are requesting becomes unsupported.
 		// See: https://meta.discourse.org/t/a-new-versioned-api-for-client-side-plugins/40051
-		// See: https://github.com/discourse/discourse/blob/master/app/assets/javascripts/discourse/lib/plugin-api.js.es6
+		// See: https://github.com/discourse/discourse/blob/main/app/assets/javascripts/discourse/app/lib/plugin-api.js
 		withPluginApi('0.7', apiInitCallback);
 	}
 };

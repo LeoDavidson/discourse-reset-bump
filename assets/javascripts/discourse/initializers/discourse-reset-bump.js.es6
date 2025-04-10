@@ -44,7 +44,7 @@ function resetBumpButtonDecorateCallback(dec) {
 	// Maybe related to this: http://stackoverflow.com/questions/41792503/node-js-callback-not-defined-when-trying-to-to-a-http-request
 	const buttonAttr = {
 		className: 'reset-bump',          // Becomes part of button's css class. Useful for css mods.
-		icon: 'calendar-times',           // Find icon names here: http://fontawesome.io/icons/
+		icon: 'clock-rotate-left',        // Find icon names here: http://fontawesome.io/icons/
 		label: 'reset_bump.button_label', // Name of string in e.g. config/locales/client.en.yml
 		action: 'actionResetBump',        // Internal name, used to refer to the button below.
 		secondaryAction: 'closeAdminMenu' // Needed in newer Discourse versions, else the menu stays open.
@@ -67,7 +67,7 @@ function newApiInitCallback(api)
 
 				ajax("/reset_bump", ajaxParams).catch(popupAjaxError);
 			},
-			icon: 'calendar-times',
+			icon: 'clock-rotate-left',
 			className: 'reset-bump',
 			label: 'reset_bump.button_label',
 		};
@@ -120,7 +120,7 @@ function apiInitCallback(api)
 	api.addPostMenuButton('actionResetBump2', attrs => {
 			return {
 				className: 'reset-bump',          // Becomes part of button's css class. Useful for css mods.
-				icon: 'calendar-times',           // Find icon names here: http://fontawesome.io/icons/
+				icon: 'clock-rotate-left',        // Find icon names here: http://fontawesome.io/icons/
 				title: 'reset_bump.button_label', // Shown on hover. Name of string in e.g. config/locales/client.en.yml
 				action: 'actionResetBump2',       // Internal name, used to refer to the button below.
 				position: 'first'                 // Make it the first button in the row.

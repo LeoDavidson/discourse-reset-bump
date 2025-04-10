@@ -15,7 +15,7 @@ enabled_site_setting :reset_bump_enabled
 # The icon itself is used within assets/javascripts/discourse/initializers/discourse-reset-bump.js.es6
 # More detail at https://meta.discourse.org/t/introducing-font-awesome-5-and-svg-icons/101643
 
-register_svg_icon "calendar-times" if respond_to?(:register_svg_icon)
+register_svg_icon "clock-rotate-left" if respond_to?(:register_svg_icon)
 
 # after_initialize is a callback that happens after this ruby file has been loaded. I'm not sure
 # if we NEED to do everything in after_initialize but it's the done thing, and may ensure we

@@ -5,3 +5,7 @@ auto_generated
 Gemfile.lock
 .DS_Store
 *.swp
+node_modules
+/gems
+/auto_generated
+.eslintcache

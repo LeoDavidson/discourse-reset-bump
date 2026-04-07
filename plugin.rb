@@ -22,7 +22,6 @@ register_svg_icon "clock-rotate-left" if respond_to?(:register_svg_icon)
 # instantiate other objects after all the modifications have been done to them, not before.
 
 after_initialize do
-
   # Isolate our plugin in a separate Rails Engine and namespace.
   # This helps avoid conflicts between e.g. two objects having the same names.
 
@@ -41,7 +40,7 @@ after_initialize do
   # and not about writing plugins, so not everything is completely applicable:
   # https://meta.discourse.org/t/creating-routes-in-discourse-and-showing-data/48827
 
-  require_dependency 'application_controller'
+  require_dependency "application_controller"
   class DiscourseResetBump::ResetBumpController < ::ApplicationController
     # As our functionality is only intended for "staff" users, we do server-side
     # checks to ensure we are called from a logged-on user, and that the user is staff.
@@ -54,18 +53,20 @@ after_initialize do
     before_action :ensure_logged_in
     before_action :ensure_staff
 
-	# The routes (URLs) we set up are still there if we are disabled, so we should check
-	# if we should do anything. A lot of plugins don't seem to do this, for what it's worth.
-	# It seems worthwhile: If a security bug is found then a quick way to make all our URLs do
-	# nothing could block access to whatever is being exploited.
-	# "before_action :ensure_plugin_enabled", above, ensures this is called before handling a URL.
+    # The routes (URLs) we set up are still there if we are disabled, so we should check
+    # if we should do anything. A lot of plugins don't seem to do this, for what it's worth.
+    # It seems worthwhile: If a security bug is found then a quick way to make all our URLs do
+    # nothing could block access to whatever is being exploited.
+    # "before_action :ensure_plugin_enabled", above, ensures this is called before handling a URL.
     def ensure_plugin_enabled
-      raise Discourse::InvalidAccess.new('Reset Bump plugin is not enabled') if !SiteSetting.reset_bump_enabled
+      if !SiteSetting.reset_bump_enabled
+        raise Discourse::InvalidAccess.new("Reset Bump plugin is not enabled")
+      end
     end
 
     # The Admin::AdminController mentioned in "Creating Routes in Discourse and Showing Data"
     # is (at the time of writing) like ::ApplicationController but with the above two checks
-    # built-in, and an "index" method that returns nothing. I'm not sure if we should use 
+    # built-in, and an "index" method that returns nothing. I'm not sure if we should use
     # Admin::AdminController from a plugin (other plugins I looked at don't) and I only worked
     # out how to after I had already tested things, so I'm sticking with how it is. But here
     # is how you would use Admin::AdminController instead if you wanted to:
@@ -83,19 +84,14 @@ after_initialize do
     # Each method name corresponds to one of the Engine.routes.draw things below.
     # "bump" is our main method, and may end up being the only one we need.
     def bump
-
       # params[:post_id].to_i would return 0 if the param was missing, so this is a bit redundant
       # but a good habit for when zero is a valid input that we need to separate from a missing param.
-      if (!params.has_key?(:post_id))
-        return render_json_error("Parameter missing: post_id")
-      end
+      return render_json_error("Parameter missing: post_id") if (!params.has_key?(:post_id))
 
       post_id = params[:post_id].to_i
 
       # There is never a post with id <= 0.
-      if (post_id <= 0)
-        return render_json_error("Parameter invalid: post_id")
-      end
+      return render_json_error("Parameter invalid: post_id") if (post_id <= 0)
 
       # I'd like to wrap everything in a transaction so it is atomic...
       # ...but I don't understand Rails transactions well enough. :-) It's not super important in this case.
@@ -112,25 +108,24 @@ after_initialize do
       # e.g. https://github.com/discourse/discourse/blob/master/app/models/topic.rb
 
       post_for_bump = Post.find(post_id)
-      
-      if post_for_bump.blank?
-        return render_json_error("post_id #{post_id} not found")
-      end
-      
+
+      return render_json_error("post_id #{post_id} not found") if post_for_bump.blank?
+
       topic_for_bump = Topic.find(post_for_bump.topic_id)
 
       if topic_for_bump.blank?
-        return render_json_error("post_id #{post_id} -> topic_id #{post_for_bump.topic_id} not found")
+        return(
+          render_json_error("post_id #{post_id} -> topic_id #{post_for_bump.topic_id} not found")
+        )
       end
 
-      old_bumped_at = topic_for_bump.bumped_at;
-      new_bumped_at = post_for_bump.created_at;
+      old_bumped_at = topic_for_bump.bumped_at
+      new_bumped_at = post_for_bump.created_at
 
       # We use "update!" (throws exceptions on errors) instead of "update" (returns boolean success).
       # All the Discourse code I've looked at calls "update" and doesn't check the result, so I don't
       # know if I'm doing something extra here that isn't needed or not. Failure would be unusual anyway.
-      topic_for_bump.update!(bumped_at:         new_bumped_at,
-                             last_post_user_id: post_for_bump.user_id)
+      topic_for_bump.update!(bumped_at: new_bumped_at, last_post_user_id: post_for_bump.user_id)
 
       # There is also last_posted_at but I think it makes sense to leave that alone.
       # Arguably, we could take the last non-deleted post and use that for the last_post_user_id and last_posted_at
@@ -148,18 +143,20 @@ after_initialize do
       # Search the source for log_custom for examples.
       # Go to http://localhost:4000/admin/logs/staff_action_logs to see the log.
 
-      thread_url_path = "/t/#{topic_for_bump.slug}/#{topic_for_bump.id}/#{post_for_bump.post_number}"
+      thread_url_path =
+        "/t/#{topic_for_bump.slug}/#{topic_for_bump.id}/#{post_for_bump.post_number}"
 
-      StaffActionLogger.new(current_user).log_custom('reset_post_bump',
-             post_id: post_id,
-             previous_value: old_bumped_at,
-             new_value: new_bumped_at,
-             context: thread_url_path )
+      StaffActionLogger.new(current_user).log_custom(
+        "reset_post_bump",
+        post_id: post_id,
+        previous_value: old_bumped_at,
+        new_value: new_bumped_at,
+        context: thread_url_path,
+      )
 
       # Return a success flag back to the caller.
       # If we don't do this, their "catch(popupAjaxError)" stuff will be triggered.
       return render json: success_json
-
     end
   end
 
@@ -175,7 +172,7 @@ after_initialize do
   # https://github.com/discourse/discourse/blob/master/lib/staff_constraint.rb
   require_dependency "staff_constraint"
   DiscourseResetBump::Engine.routes.draw do
-    post '/' => 'reset_bump#bump', constraints: StaffConstraint.new
+    post "/" => "reset_bump#bump", :constraints => StaffConstraint.new
   end
 
   # This makes it so "http://www.site.com/reset_bump" (and deeper paths) comes to our engine.
@@ -186,8 +183,5 @@ after_initialize do
   # The user cannot navigate to this URL and see anything in a browser unless the client side
   # also has a route set up (an "Ember Route"), but we don't actually need that for this plugin.
   # Our URL is only going to be called via AJAX, not via navigating to it directly.
-  Discourse::Application.routes.append do
-    mount ::DiscourseResetBump::Engine, at: "/reset_bump"
-  end
-
+  Discourse::Application.routes.append { mount ::DiscourseResetBump::Engine, at: "/reset_bump" }
 end
